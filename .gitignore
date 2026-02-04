@@ -1,0 +1,18 @@
+# Generated Reports
+Baseline_*.xlsx
+
+# PowerShell
+*.log
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Credentials
+*.credentials
+*.token

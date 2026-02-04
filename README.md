@@ -199,6 +199,44 @@ Configura **políticas de autenticação, SSPR e proteção de senha** para segu
 
 ---
 
+### 9️⃣ **Inventory Report Generator** (`inventoryReportGenerator.ps1`)
+Gera **relatório Excel completo com inventário de todos os recursos** criados pelos scripts anteriores.
+
+**Relatório Contém (8 Abas):**
+- 📊 **Summary** - Resumo executivo com contadores
+  - Total de usuários, grupos, apps, políticas, etc
+  - Data e hora do relatório
+- 👥 **Usuários**
+  - Nome, UPN, Licença, Departamento, Habilitado, Tipo
+- 👥 **Grupos**
+  - Nome, Tipo (Security/M365/Dynamic), Membros, Owners, Dinâmico
+- 📱 **Aplicações**
+  - Nome, AppId, Redirect URIs, Owners  
+- 🔐 **Políticas CA**
+  - Nome, Estado, Condições, Controles
+- 👑 **Roles**
+  - Role, Usuário, Tipo, Scope
+- 📍 **Named Locations**
+  - Nome, Tipo (IP-based/Country-based)
+- 🏢 **Administrative Units**
+  - Nome, Membros, Descrição
+
+**Funcionalidades:**
+- ✅ Coleta dados de múltiplas entidades
+- ✅ Cria arquivo Excel formatado profissionalmente
+- ✅ Salva com data (Baseline_YYYYMMDD.xlsx)
+- ✅ Múltiplas abas para diferentes recursos
+- ✅ Auto-sizing de colunas
+- ✅ Resumo executivo integrado
+
+**Características Técnicas:**
+- Usa módulo ImportExcel para excelente formatação
+- Instalação automática de dependências
+- Tratamento de erros para dados indisponíveis
+- Relatório baseline para auditorias futuras
+
+---
+
 ## 🎯 Recursos Técnicos Comuns
 
 Todos os scripts foram desenvolvidos com os mesmos padrões de qualidade:
@@ -298,6 +336,10 @@ Cada script usa escopos específicos:
 # 6. Configurar Autenticação
 . './authenticationConfigGenerator.ps1'
 # Configura Authentication Methods, SSPR, Password Protection
+
+# 7. Gerar Relatório
+. './inventoryReportGenerator.ps1'
+# Gera arquivo Excel com inventário completo (Baseline_YYYYMMDD.xlsx)
 ```
 
 ---
@@ -374,6 +416,7 @@ Performance esperada:
 | CA Generator | 5 políticas + 2 locations | 3-5 min |
 | Roles & PIM Generator | 3 roles + 2 AUs | 3-5 min |
 | Authentication Config | 3 auth methods + SSPR | 3-5 min |
+| Inventory Report | 8 abas Excel | 2-3 min |
 
 ---
 
@@ -409,6 +452,7 @@ Como SysAdmin/Cloud Administrator, este portfólio mostra que você pode:
 6. **Escalar operações** - De 1 para 100+ recursos sem aumentar complexidade
 7. **Gerenciar governança de identidades** - Roles, PIM, Administrative Units com segurança
 8. **Implementar políticas de segurança** - MFA, SSPR, Password Protection em escala
+9. **Gerar relatórios executivos** - Excel/Baseline para auditorias e compliance
 
 ---
 
