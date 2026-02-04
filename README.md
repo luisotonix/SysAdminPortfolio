@@ -1,5 +1,7 @@
 # 🔐 SysAdmin Portfolio - Microsoft 365 & Azure AD Automation Suite
 
+Por Luís Otoni — Cloud Admin @ Grupo UOL
+
 Um conjunto completo e profissional de scripts PowerShell para automação de Microsoft 365 e Azure Active Directory, desenvolvido com foco em **segurança**, **confiabilidade** e **experiência do usuário**.
 
 ## 📊 Sobre Este Projeto
