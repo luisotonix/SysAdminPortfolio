@@ -239,6 +239,99 @@ Gera **relatório Excel completo com inventário de todos os recursos** criados 
 
 ---
 
+### 🔟 **M365 Test Email Generator** (`m365TestEmailGenerator.ps1`)
+Gera **~110 emails de teste** entre usuários do tenant para validar configurações de Exchange Online e backup.
+
+**Características:**
+- 📧 **~110 emails distribuídos em 2 fases:**
+  - Fase 1: 20 emails para destinatários aleatórios
+  - Fase 2: 90 emails (9 lotes de 10 cada), também para destinatários aleatórios
+- 🎲 **Seleção dinâmica de destinatários** - Usa usuários reais do tenant
+- ⚠️ **Modo WhatIf/Simulação** - Teste antes de enviar real
+- ⏱️ **Rate limiting** - 2 segundos entre emails (configurável)
+- ✅ **Validação de tenant** obrigatória
+- 📊 **Retroalimentação em tempo real** - Sucesso/erro por email
+
+**Funcionalidades Avançadas:**
+- ✅ Auto-conexão ao Microsoft Graph se necessário
+- ✅ Descoberta automática de usuários do tenant (até 200)
+- ✅ Validação de pelo menos 2 usuários antes de enviar
+- ✅ Confirmação de tenant antes de execução
+- ✅ Identifica remetente (seu usuário autenticado)
+
+**Parâmetros:**
+```powershell
+# Simulação (recomendado primeiro)
+. './m365TestEmailGenerator.ps1' -WhatIf -AutoConfirm
+
+# Envio real (só após validar simulação)
+. './m365TestEmailGenerator.ps1' -AutoConfirm
+
+# Com pausa customizada entre emails
+. './m365TestEmailGenerator.ps1' -PauseSeconds 1
+```
+
+**Use Cases:**
+- 🧪 Testar configuração de Exchange Online
+- 💾 Validar backup de mailboxes
+- 📊 Gerar atividade de email para testes de audit
+- 🔐 Validar políticas de retenção de email
+- 📈 Preparar cenário realista para UAT
+
+**Requisitos:**
+- ✅ Estar conectado ao Microsoft Graph com permissão `Mail.Send`
+- ✅ Seu usuário deve ter mailbox ativo
+- ✅ Mínimo 2 usuários no tenant para recipients aleatórios
+
+**Exemplo de Execução Manual (Recomendado):**
+
+Para evitar problemas de sessão, execute manualmente em PowerShell interativo:
+
+```powershell
+# 1. Abrir PowerShell como Administrator
+# 2. Navegar até o diretório do script
+
+# 3. Conectar ao Microsoft Graph primeiro (interativo via WAM/browser)
+Connect-MgGraph -Scopes 'User.Read','Mail.Send','User.Read.All'
+
+# 4. Validar sua identidade
+Get-MgMe  # Mostra seu UPN
+
+# 5. Testar em modo simulação
+. './m365TestEmailGenerator.ps1' -WhatIf -AutoConfirm
+
+# 6. Se simulação passou, executar envio real
+. './m365TestEmailGenerator.ps1' -AutoConfirm
+
+# 7. Desconectar quando terminar
+Disconnect-MgGraph
+```
+
+**Saída Esperada:**
+
+```
+📧 M365 Test Email Generator
+🔐 Verificando conexão ao Microsoft Graph...
+✅ Conectado ao Microsoft Graph
+🔎 Buscando usuários do tenant...
+✅ Encontrados 105 usuários no tenant.
+
+📧 Preparando envio de ~110 emails para múltiplos destinatários...
+▶ Fase 1: 20 emails para destinatários aleatórios
+✅ Sent to: usuario.teste45@lfosoares.onmicrosoft.com : Email Teste 1
+✅ Sent to: usuario.teste64@lfosoares.onmicrosoft.com : Email Teste 2
+...
+✅ Concluído: 20 emails enviados.
+
+▶ Fase 2: 90 emails adicionais (9 lotes de 10)
+Concluído: Lote 1 (10 emails)
+Concluído: Lote 2 (10 emails)
+...
+✅ Processo finalizado. Total: ~110 emails enviados.
+```
+
+---
+
 ## 🎯 Recursos Técnicos Comuns
 
 Todos os scripts foram desenvolvidos com os mesmos padrões de qualidade:
@@ -419,6 +512,7 @@ Performance esperada:
 | Roles & PIM Generator | 3 roles + 2 AUs | 3-5 min |
 | Authentication Config | 3 auth methods + SSPR | 3-5 min |
 | Inventory Report | 8 abas Excel | 2-3 min |
+| M365 Test Email Generator | ~110 emails | 4-5 min |
 
 ---
 
