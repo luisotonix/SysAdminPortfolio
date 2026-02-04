@@ -158,6 +158,47 @@ Gerencia **roles privilegiadas, Administrative Units e Privileged Identity Manag
 
 ---
 
+### 8️⃣ **Authentication Configuration Generator** (`authenticationConfigGenerator.ps1`)
+Configura **políticas de autenticação, SSPR e proteção de senha** para segurança máxima de acesso.
+
+**Configurações:**
+- 🔐 **Authentication Methods Policy (3 habilitados):**
+  - FIDO2 Security Key (grupos aleatórios)
+  - Microsoft Authenticator (grupos aleatórios)
+  - SMS (grupos aleatórios)
+  - Voice Calls desabilitado
+- 🔑 **Self-Service Password Reset (SSPR):**
+  - Habilitado para grupo específico
+  - 2 métodos requeridos (Email, Mobile, Security Questions)
+  - 5 Security Questions pré-configuradas
+- ⛔ **Password Protection:**
+  - Lockout: 5 tentativas, 600 segundos (10 minutos)
+  - 10 senhas banidas personalizadas
+
+**Métodos de Autenticação:**
+- Email
+- Mobile phone
+- Security questions
+
+**Security Questions Incluídas:**
+- What is your mother's maiden name?
+- In what city were you born?
+- What was the name of your first pet?
+- What is your favorite food?
+- What is your favorite book?
+
+**Senhas Bloqueadas:**
+- grupouol, uol2024, senha123, password, admin123, tecnologia, brasil2024, welcome, default, master
+
+**Características:**
+- ✅ Confirmação dupla antes de configurar
+- ✅ Grupos aleatórios selecionados automaticamente
+- ✅ Guias passo-a-passo integrados para Portal
+- ✅ Recomendações de teste piloto
+- 📊 Relatório completo de configurações
+
+---
+
 ## 🎯 Recursos Técnicos Comuns
 
 Todos os scripts foram desenvolvidos com os mesmos padrões de qualidade:
@@ -211,8 +252,10 @@ Cada script usa escopos específicos:
 - `Application.ReadWrite.All` - Manejo de apps
 - `Directory.ReadWrite.All` - Operações do diretório
 - `Policy.ReadWrite.ConditionalAccess` - Políticas de CA
-- `RoleManagement.ReadWrite.Directory` - Manejo de roles (FASE 5)
-- `PrivilegedAccess.ReadWrite.AzureAD` - PIM e elevação de privilégios (FASE 5)
+- `RoleManagement.ReadWrite.Directory` - Manejo de roles
+- `PrivilegedAccess.ReadWrite.AzureAD` - PIM e elevação de privilégios
+- `PolicyConfiguration.ReadWrite.AuthenticationMethod` - Auth methods
+- `AuthenticationMethod.ReadWrite.All` - Configuração de autenticação
 
 ---
 
@@ -251,6 +294,10 @@ Cada script usa escopos específicos:
 # 5. Configurar Roles e PIM
 . './rolesAndPimGenerator.ps1'
 # Atribui 3 roles, cria 2 AUs, guia para PIM
+
+# 6. Configurar Autenticação
+. './authenticationConfigGenerator.ps1'
+# Configura Authentication Methods, SSPR, Password Protection
 ```
 
 ---
@@ -324,7 +371,10 @@ Performance esperada:
 | User Disabler | 5 usuários | 1-2 min |
 | Groups Generator | 47 grupos | 10-15 min |
 | Applications Generator | 10 apps + 2 services | 5-10 min |
-| CA Generator | 5 políticas + 2 locations | 3-5 min || Roles & PIM Generator | 3 roles + 2 AUs | 3-5 min |
+| CA Generator | 5 políticas + 2 locations | 3-5 min |
+| Roles & PIM Generator | 3 roles + 2 AUs | 3-5 min |
+| Authentication Config | 3 auth methods + SSPR | 3-5 min |
+
 ---
 
 ## ⚠️ Responsabilidades & Segurança
@@ -358,6 +408,7 @@ Como SysAdmin/Cloud Administrator, este portfólio mostra que você pode:
 5. **Criar experiência profissional** - UX feedback, relatórios, e documentação
 6. **Escalar operações** - De 1 para 100+ recursos sem aumentar complexidade
 7. **Gerenciar governança de identidades** - Roles, PIM, Administrative Units com segurança
+8. **Implementar políticas de segurança** - MFA, SSPR, Password Protection em escala
 
 ---
 
