@@ -24,7 +24,7 @@ function Get-RandomAppName {
 
 # Conectar ao Microsoft Graph
 Write-Host "🔐 Conectando ao Microsoft Graph..." -ForegroundColor Cyan
-Connect-MgGraph -Scopes "Application.ReadWrite.All", "ServicePrincipal.ReadWrite.All", "User.ReadWrite.All", "Group.ReadWrite.All", "Directory.ReadWrite.All" | Out-Null
+Connect-MgGraph -Scopes "Application.ReadWrite.All", "User.ReadWrite.All", "Group.ReadWrite.All", "Directory.ReadWrite.All", "AppRoleAssignment.ReadWrite.All" | Out-Null
 
 # Obter informações do tenant
 Write-Host ""
@@ -160,17 +160,17 @@ if ($appRegistrations.Count -gt 0) {
         Write-Host ""
         Write-Host "🔑 Adicionando Client Secrets..." -ForegroundColor Cyan
         
-        $sp = Get-MgServicePrincipal -Filter "appId eq '$($configApp.AppId)'"
-        
-        $secret1 = Add-MgApplicationPassword -ApplicationId $configApp.Id -DisplayName "Secret 1 - 6 months" `
-            -EndDateTime (Get-Date).AddMonths(6)
-        Write-Host "✅ Client Secret 1 criado (6 meses)" -ForegroundColor Green
-        
-        Start-Sleep -Milliseconds 500
-        
-        $secret2 = Add-MgApplicationPassword -ApplicationId $configApp.Id -DisplayName "Secret 2 - 12 months" `
-            -EndDateTime (Get-Date).AddYears(1)
-        Write-Host "✅ Client Secret 2 criado (12 meses)" -ForegroundColor Green
+        try {
+            $secret1 = Add-MgApplicationPassword -ApplicationId $configApp.Id
+            Write-Host "✅ Client Secret 1 criado (6 meses padrão)" -ForegroundColor Green
+            
+            Start-Sleep -Milliseconds 500
+            
+            $secret2 = Add-MgApplicationPassword -ApplicationId $configApp.Id
+            Write-Host "✅ Client Secret 2 criado (válido até expiração padrão)" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️  Erro ao adicionar Client Secrets: $_" -ForegroundColor Yellow
+        }
         
         # ========== Adicionar Owners ==========
         Write-Host ""
@@ -181,10 +181,11 @@ if ($appRegistrations.Count -gt 0) {
             
             foreach ($owner in $randomOwners) {
                 try {
-                    New-MgApplicationOwner -ApplicationId $configApp.Id -DirectoryObjectId $owner.Id
+                    # Usar Update-MgApplication para adicionar owners
+                    New-MgApplicationOwnerByRef -ApplicationId $configApp.Id -OdataId "https://graph.microsoft.com/v1.0/directoryObjects/$($owner.Id)"
                     Write-Host "✅ $($owner.DisplayName) adicionado como owner" -ForegroundColor Green
                 } catch {
-                    Write-Host "⚠️  Erro ao adicionar owner: $_" -ForegroundColor Yellow
+                    Write-Host "⚠️  Erro ao adicionar owner $($owner.DisplayName): Pode já existir ou problema de permissões" -ForegroundColor Yellow
                 }
                 
                 Start-Sleep -Milliseconds 300
@@ -218,58 +219,66 @@ for ($i = 1; $i -le 2; $i++) {
         Write-Host ""
         Write-Host "🏢 [$i/2] Criando: $enterpriseName" -ForegroundColor Cyan
         
-        # Criar a aplicação Enterprise (Service Principal)
-        $enterpriseApp = New-MgServicePrincipal -AppId (New-Guid).Guid -DisplayName $enterpriseName
+        # Criar primeiro uma aplicação (Application), depois o Service Principal
+        $newAppForEnterprise = New-MgApplication -DisplayName $enterpriseName -SignInAudience "AzureADMyOrg"
+        Start-Sleep -Milliseconds 300
+        
+        # Criar o Service Principal a partir da Application válida
+        $enterpriseApp = New-MgServicePrincipal -AppId $newAppForEnterprise.AppId -DisplayName $enterpriseName
         $enterpriseApps += $enterpriseApp
         
-        Write-Host "✅ enterprise Application criado: $enterpriseName" -ForegroundColor Green
+        Write-Host "✅ Enterprise Application criado: $enterpriseName" -ForegroundColor Green
         
         # ========== Adicionar Usuários Aleatórios ==========
-        Write-Host "👥 Adicionando usuários..." -ForegroundColor Cyan
+        Write-Host "👥 Adicionando usuários (tentando)..." -ForegroundColor Cyan
         
-        if ($allUsers.Count -gt 0) {
+        if ($allUsers.Count -gt 0 -and $enterpriseApp.AppRoles.Count -gt 0) {
             $assignedUserCount = Get-Random -Minimum 8 -Maximum 12
             $assignedUserCount = [Math]::Min($assignedUserCount, $allUsers.Count)
             $randomUsers = $allUsers | Get-Random -Count $assignedUserCount
             
+            $addedUsers = 0
             foreach ($user in $randomUsers) {
                 try {
-                    New-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $enterpriseApp.Id `
-                        -AppRoleId "00000000-0000-0000-0000-000000000000" `
-                        -PrincipalId $user.Id `
-                        -PrincipalType "User" | Out-Null
+                    $appRole = $enterpriseApp.AppRoles[0]
+                    New-MgUserAppRoleAssignment -UserId $user.Id -AppRoleId $appRole.Id -ResourceId $enterpriseApp.Id | Out-Null
+                    $addedUsers++
                 } catch {
-                    # Alguns usuários podem não ser elegíveis, continua
+                    # Silenciosamente ignora erros
                 }
                 
                 Start-Sleep -Milliseconds 100
             }
             
-            Write-Host "✅ $assignedUserCount usuários adicionados" -ForegroundColor Green
+            Write-Host "✅ Usuários processados: $addedUsers" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  Não foi possível atribuir usuários (sem app roles ou usuários)" -ForegroundColor Yellow
         }
         
         # ========== Adicionar Grupos Aleatórios ==========
-        Write-Host "👫 Adicionando grupos..." -ForegroundColor Cyan
+        Write-Host "👫 Adicionando grupos (tentando)..." -ForegroundColor Cyan
         
-        if ($allGroups.Count -gt 0) {
+        if ($allGroups.Count -gt 0 -and $enterpriseApp.AppRoles.Count -gt 0) {
             $assignedGroupCount = Get-Random -Minimum 1 -Maximum 4
             $assignedGroupCount = [Math]::Min($assignedGroupCount, $allGroups.Count)
             $randomGroups = $allGroups | Get-Random -Count $assignedGroupCount
             
+            $addedGroups = 0
             foreach ($group in $randomGroups) {
                 try {
-                    New-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $enterpriseApp.Id `
-                        -AppRoleId "00000000-0000-0000-0000-000000000000" `
-                        -PrincipalId $group.Id `
-                        -PrincipalType "Group" | Out-Null
+                    $appRole = $enterpriseApp.AppRoles[0]
+                    New-MgGroupAppRoleAssignment -GroupId $group.Id -AppRoleId $appRole.Id -ResourceId $enterpriseApp.Id | Out-Null
+                    $addedGroups++
                 } catch {
-                    # Alguns grupos podem não ser elegíveis, continua
+                    # Silenciosamente ignora erros
                 }
                 
                 Start-Sleep -Milliseconds 100
             }
             
-            Write-Host "✅ $assignedGroupCount grupos adicionados" -ForegroundColor Green
+            Write-Host "✅ Grupos processados: $addedGroups" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  Não foi possível atribuir grupos (sem app roles ou grupos)" -ForegroundColor Yellow
         }
         
         $successCount++
