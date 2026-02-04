@@ -126,6 +126,38 @@ Cria uma suite completa de **políticas de Conditional Access** para segurança.
 
 ---
 
+### 7️⃣ **Roles & PIM Generator** (`rolesAndPimGenerator.ps1`)
+Gerencia **roles privilegiadas, Administrative Units e Privileged Identity Management (PIM)** para governança de identidades.
+
+**Criações:**
+- 👤 **3 Atribuições de Roles Built-in:**
+  - Global Administrator (para usuário aleatório)
+  - User Administrator (para usuário aleatório)
+  - Application Administrator (para usuário aleatório)
+- 🏢 **2 Administrative Units:**
+  - AU-Marketing (com 10 membros aleatórios)
+  - AU-Sales (com 10 membros aleatórios)
+- 📚 **Guia Interativo para:**
+  - Custom Roles (Limited User Administrator com 5 permissões)
+  - PIM Eligible Assignments (com validação de licença P2)
+  - Scoped Role Assignments (per AU)
+
+**Funcionalidades avançadas:**
+- ✅ Ativação automática de roles (se necessário)
+- ✅ Seleção aleatória de usuários para roles
+- ✅ Validação de disponibilidade de PIM (P2 check)
+- ✅ Guias passo-a-passo para configurações via Portal
+- ✅ Mensagens de segurança alertando sobre permissões críticas
+- 📊 Relatório detalhado de assignments realizados
+
+**Características de Segurança:**
+- ⚠️ Confirmação dupla para atribuições privilegiadas
+- ⚠️ Alerta sobre requisitos de Global Admin
+- ⚠️ Orientação sobre uso de PIM just-in-time
+- ⚠️ Recomendações de audit regular
+
+---
+
 ## 🎯 Recursos Técnicos Comuns
 
 Todos os scripts foram desenvolvidos com os mesmos padrões de qualidade:
@@ -179,6 +211,8 @@ Cada script usa escopos específicos:
 - `Application.ReadWrite.All` - Manejo de apps
 - `Directory.ReadWrite.All` - Operações do diretório
 - `Policy.ReadWrite.ConditionalAccess` - Políticas de CA
+- `RoleManagement.ReadWrite.Directory` - Manejo de roles (FASE 5)
+- `PrivilegedAccess.ReadWrite.AzureAD` - PIM e elevação de privilégios (FASE 5)
 
 ---
 
@@ -213,6 +247,10 @@ Cada script usa escopos específicos:
 # 4. Criar Apps
 . './applicationsGenerator.ps1'
 # Cria 10 apps com configuração completa
+
+# 5. Configurar Roles e PIM
+. './rolesAndPimGenerator.ps1'
+# Atribui 3 roles, cria 2 AUs, guia para PIM
 ```
 
 ---
@@ -286,8 +324,7 @@ Performance esperada:
 | User Disabler | 5 usuários | 1-2 min |
 | Groups Generator | 47 grupos | 10-15 min |
 | Applications Generator | 10 apps + 2 services | 5-10 min |
-| CA Generator | 5 políticas + 2 locations | 3-5 min |
-
+| CA Generator | 5 políticas + 2 locations | 3-5 min || Roles & PIM Generator | 3 roles + 2 AUs | 3-5 min |
 ---
 
 ## ⚠️ Responsabilidades & Segurança
@@ -320,6 +357,7 @@ Como SysAdmin/Cloud Administrator, este portfólio mostra que você pode:
 4. **Pensar em segurança first** - Confirmações, escopos mínimos, validações
 5. **Criar experiência profissional** - UX feedback, relatórios, e documentação
 6. **Escalar operações** - De 1 para 100+ recursos sem aumentar complexidade
+7. **Gerenciar governança de identidades** - Roles, PIM, Administrative Units com segurança
 
 ---
 
